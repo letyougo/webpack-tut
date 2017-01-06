@@ -4,9 +4,13 @@
 
 
 var webpack = require('webpack');
-
+var path = require('path');
 var extractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+var WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+var CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+var ManifestPlugin = require('webpack-manifest-plugin');
 console.log(__dirname + "/build/js")
 module.exports = {
     devtool:'inline-source-map',
@@ -32,6 +36,13 @@ module.exports = {
         filename:'[name].js' //最终打包生产的文件名
     },
     module: {
+        // preLoaders: [
+        //     {
+        //         test: /\.(js|jsx)$/,
+        //         loader: 'eslint',
+        //         include: path.join(__dirname,'src')
+        //     }
+        // ],
         loaders:[
 
             { test: /\.css/, loader: extractTextPlugin.extract('style-loader', 'css-loader') },
@@ -43,6 +54,30 @@ module.exports = {
                     presets: ['es2015', 'react']
                 }
             },
+            {
+                test: /\.json$/,
+                loader: 'json'
+            },
+
+            // "file" loader makes sure those assets end up in the `build` folder.
+            // When you `import` an asset, you get its filename.
+            {
+                test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
+                loader: 'file',
+                query: {
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            },
+            // "url" loader works just like "file" loader but it also embeds
+            // assets smaller than specified size as data URLs to avoid requests.
+            {
+                test: /\.(mp4|webm|wav|mp3|m4a|aac|oga)(\?.*)?$/,
+                loader: 'url',
+                query: {
+                    limit: 10000,
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            }
         ]
     },
     plugins:[
@@ -98,6 +133,12 @@ module.exports = {
             name:'common', // 注意不要.js后缀
             chunks:['main','aa','bb','cc']
         }),
+
+        // new CaseSensitivePathsPlugin(),
+        new WatchMissingNodeModulesPlugin(path.join(__dirname,'node_modules')),
+        new ManifestPlugin({
+            fileName: 'asset-manifest.json'
+        })
     ]
 }
 
